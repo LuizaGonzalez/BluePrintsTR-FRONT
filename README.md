@@ -103,3 +103,5 @@ en otro lenguaje. Esto redujo la complejidad operativa y el riesgo de inconsiste
 **Limitación principal de STOMP**
 
 El broker simple (SimpleBroker) que usamos no sincroniza mensajes entre múltiples instancias del servidor.
+
+[videoFuncionamiento.mp4](imagenes/videoFuncionamiento.mp4)

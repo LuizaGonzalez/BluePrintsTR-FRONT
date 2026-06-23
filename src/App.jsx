@@ -145,10 +145,13 @@ export default function App() {
 
   function onCanvasClick(e) {
     if (!author || !name) return
-    const rect = e.target.getBoundingClientRect()
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
     const point = {
-      x: Math.round(e.clientX - rect.left),
-      y: Math.round(e.clientY - rect.top)
+        x: Math.round((e.clientX - rect.left) * scaleX),
+        y: Math.round((e.clientY - rect.top) * scaleY)
     }
 
     if (tech === 'stomp') {
@@ -229,24 +232,29 @@ export default function App() {
   }
 
   function deleteBlueprint() {
-    if (!author || !name) return
-    if (!confirm(`¿Eliminar el plano "${name}" de ${author}?`)) return
-    setError(null)
-    const authorToReload = author
-    fetch(`${API_BASE}/api/v1/blueprints/${author}/${name}`, { method: 'DELETE' })
-      .then(r => {
-        if (!r.ok) throw new Error(`Error ${r.status} al eliminar el plano`)
-        console.log('Plano eliminado:', author, name)
-        setSelectedBp(null)
-        setAuthor('')
-        setName('')
-        setPoints([])
-        loadBlueprints(authorToReload)
-      })
-      .catch(err => {
-        console.error('deleteBlueprint error:', err)
-        setError(err.message)
-      })
+      if (!author || !name) return
+      if (!confirm(`¿Eliminar el plano "${name}" de ${author}?`)) return
+      setError(null)
+      const authorToReload = author
+      const nameToDelete = name
+      console.log('Eliminando:', authorToReload, nameToDelete)
+
+      setSelectedBp(null)
+      setAuthor('')
+      setName('')
+      setPoints([])
+
+      fetch(`${API_BASE}/api/v1/blueprints/${authorToReload}/${nameToDelete}`, { method: 'DELETE' })
+        .then(r => {
+          console.log('Respuesta DELETE:', r.status)
+          if (!r.ok) throw new Error(`Error ${r.status} al eliminar el plano`)
+          console.log('Plano eliminado, recargando lista de:', authorToReload)
+          loadBlueprints(authorToReload)
+        })
+        .catch(err => {
+          console.error('deleteBlueprint error:', err)
+          setError(err.message)
+        })
   }
 
   const totalPoints = blueprints.reduce((acc, bp) => acc + (bp.points?.length ?? 0), 0)
